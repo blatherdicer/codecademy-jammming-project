@@ -24,29 +24,45 @@ export default class App extends React.Component {
         artist: "The Cars",
         album: "Drive"
       }];
-
     const testPlaylistTracks = [
-      {id: 1,
+      {id: 4,
         name: "The Race",
         artist: "Yello",
         album: "Flag"
       },{
-        id: 2,
+        id: 5,
         name: "Gold",
         artist: "Spandau Ballet",
         album: "Best of Spandau Ballet"
-      },{id: 3,
+      },{id: 6,
         name: "Romeo and Juliet",
         artist: "Dire Straits",
         album: "Love over Gold"
       }];
-
     const testPlaylistName = 'My Playlist';
-
     this.state = {
       searchResults: testSearchResults,
       playlistName: testPlaylistName,
       playlistTracks: testPlaylistTracks
+    }
+    this.addTrack = this.addTrack.bind(this);
+    this.removeTrack = this.removeTrack.bind(this);
+  }
+
+  addTrack(trackToAdd) {
+    if (!this.state.playlistTracks.find(existTrack => existTrack.id === trackToAdd.id)) {
+      this.setState({
+        playlistTracks: [...this.state.playlistTracks, trackToAdd]
+      })
+    }
+  }
+
+  removeTrack(trackToRemove) {
+    const updatedPlaylistTracks = this.state.playlistTracks.filter(existTrack => existTrack.id !== trackToRemove.id);
+    if (updatedPlaylistTracks.length !== this.state.playlistTracks.length) {
+      this.setState({
+        playlistTracks: updatedPlaylistTracks
+      })
     }
   }
 
@@ -57,8 +73,10 @@ export default class App extends React.Component {
         <div className="App">
           <SearchBar />
           <div className="App-playlist">
-            <SearchResults searchResults={this.state.searchResults}/>
-            <Playlist playlistName = {this.state.playlistName} 
+            <SearchResults onAdd = {this.addTrack} searchResults = {this.state.searchResults}/>
+            <Playlist 
+                onRemove = {this.removeTrack}
+                playlistName = {this.state.playlistName} 
                 playlistTracks = {this.state.playlistTracks} 
             />
           </div>

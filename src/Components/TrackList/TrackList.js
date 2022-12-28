@@ -10,9 +10,13 @@ export class TrackList extends React.Component {
       <div className="TrackList">
        {tracks.map( (trck) => 
             <Track key={trck.id.toString()}
+                   track={trck} 
                    name={trck.name} 
                    artist = {trck.artist}
                    album = {trck.album}
+                   onAdd = {this.props.onAdd}
+                   onRemove = {this.props.onRemove}
+                   isRemoval = {this.props.isRemoval}
                    />)}
       </div>
     )
