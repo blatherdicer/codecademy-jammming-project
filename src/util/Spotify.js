@@ -34,7 +34,6 @@ const Spotify = {
   },
 
   renderTracks: function (jsonResponse) {
-    console.log(jsonResponse.tracks.items);
     if (jsonResponse.tracks.items) {
       const tracksToReturn = jsonResponse.tracks.items.map((trck) => {
         return {
