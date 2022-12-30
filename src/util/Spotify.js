@@ -6,11 +6,11 @@ let expiresIn = "";
 const Spotify = {
 
   getAccessToken: function () {
-    if (accessToken) {                
+    if (accessToken) {
       // if there, return it
       return accessToken;
 
-    } else {                           
+    } else {
       // check for token in URL
       // Spotify is returning an array of two items: full parameter and just the value, hence [1]
       const url = window.location.href;
@@ -25,7 +25,7 @@ const Spotify = {
         window.history.pushState('Access Token', null, '/');
         return accessToken;
 
-      } else {                        
+      } else {
         // redirect to authenticate
         window.location = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&scope=playlist-modify-public&redirect_uri=${REDIRECT_URI}`;
 
@@ -38,12 +38,13 @@ const Spotify = {
     if (jsonResponse.tracks.items) {
       const tracksToReturn = jsonResponse.tracks.items.map((trck) => {
         return {
-        id: trck.id,
-        name: trck.name,
-        artist: trck.artists[0].name,
-        album: trck.album.name,
-        uri: trck.uri 
-      }});
+          id: trck.id,
+          name: trck.name,
+          artist: trck.artists[0].name,
+          album: trck.album.name,
+          uri: trck.uri
+        }
+      });
       return tracksToReturn;
     } else {
       return [];
@@ -51,25 +52,98 @@ const Spotify = {
   },
 
   search: async function (term) {
-    
-      const apiToken = this.getAccessToken();
-      const apiEndpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
-      try {
-        const response = await fetch( apiEndpoint, 
-          { method: 'GET',
-              headers: { 
-                'Authorization': 'Bearer '+apiToken,
-                'Content-Type': 'application/json'
-              }
-            });
-        if(response.ok){
-          const jsonResponse = await response.json();
-          return this.renderTracks(jsonResponse);
-        }
-      } catch (error) {
-        console.log("ERROR:"+error.status+"-"+error.message);
+    const apiToken = this.getAccessToken();
+    const apiHeaders = {
+      'Authorization': 'Bearer ' + apiToken,
+      'Content-Type': 'application/json'
+    };
+    const apiEndpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
+    try {
+      const response = await fetch(apiEndpoint,
+        {
+          method: 'GET',
+          headers: apiHeaders
+        });
+      if (response.ok) {
+        const jsonResponse = await response.json();
+        return this.renderTracks(jsonResponse);
       }
+    } catch (error) {
+      console.log("ERROR:" + error.status + "-" + error.message);
     }
-  }
+  },
 
-module.exports = {Spotify};
+  savePlaylist: async function (playlistName, playlistTracks) {
+    if (!playlistName || !playlistTracks) {
+      return
+    }
+    let apiToken = this.getAccessToken();
+    const apiHeaders = {
+      'Authorization': 'Bearer ' + apiToken,
+      'Content-Type': 'application/json'
+    };
+    let userID = '';
+
+    // get user ID from Spotify API
+    let apiEndpoint = `https://api.spotify.com/v1/me`;
+    try {
+      const response = await fetch(apiEndpoint,
+        {
+          method: 'GET',
+          headers: apiHeaders
+        });
+      if (response.ok) {
+        const userJsonResponse = await response.json();
+        userID = userJsonResponse.id;
+      }
+    } catch (error) {
+      console.log("ERROR:" + error.status + "-" + error.message);
+    };
+
+    //create new Playlist
+    let playlistID = '';
+    apiToken = this.getAccessToken();
+    apiEndpoint = `https://api.spotify.com/v1/users/${userID}/playlists`;
+    try {
+      const response = await fetch(apiEndpoint,
+        {
+          method: 'POST',
+          headers: apiHeaders,
+          body: JSON.stringify({
+            name: playlistName,
+            description: 'Playlist from Jammming for Codecademy learning project',
+            public: true
+          })
+        });
+      if (response.ok) {
+        const playlistJsonResponse = await response.json();
+        playlistID = playlistJsonResponse.id;
+      }
+    } catch (error) {
+      console.log("ERROR:" + error.status + "-" + error.message);
+    };
+
+    //add the tracks to the Playlist
+    apiToken = this.getAccessToken();
+    apiEndpoint = `https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
+    try {
+      const response = await fetch(apiEndpoint,
+        {
+          method: 'POST',
+          headers: apiHeaders,
+          body: JSON.stringify({
+            uris: playlistTracks
+          })
+        });
+      if (response.ok) {
+        console.log('Success - created playlist.');
+        return(true);
+      }
+    } catch (error) {
+      console.log("ERROR:" + error.status + "-" + error.message);
+    };
+
+  }
+}
+
+module.exports = { Spotify };

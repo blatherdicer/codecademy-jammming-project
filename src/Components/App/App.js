@@ -49,9 +49,9 @@ export default class App extends React.Component {
       }];
     const testPlaylistName = 'My Playlist';
     this.state = {
-      searchResults: testSearchResults,
-      playlistName: testPlaylistName,
-      playlistTracks: testPlaylistTracks
+      searchResults: [],
+      playlistName: 'My Playlist',
+      playlistTracks: []
     }
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -83,7 +83,7 @@ export default class App extends React.Component {
 
   savePlaylist() {
     const trackURIs = this.state.playlistTracks.map((trk)=> trk.uri);
-    console.log(trackURIs)
+    Spotify.savePlaylist('Test Playlist',trackURIs);
   }
 
   async search(term){
