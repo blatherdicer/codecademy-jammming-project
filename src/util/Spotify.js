@@ -12,10 +12,14 @@ const Spotify = {
 
     } else {                           
       // check for token in URL
+      // Spotify is returning an array of two items: full parameter and just the value, hence [1]
       const url = window.location.href;
-      accessToken = url.match(/access_token=([^&]*)/);
-      expiresIn = url.match(/expires_in=([^&]*)/);
-
+      const accessTokenParams = url.match(/access_token=([^&]*)/);
+      const expiresInParams = url.match(/expires_in=([^&]*)/);
+      if (accessTokenParams) {
+        accessToken = accessTokenParams[1];
+        expiresIn = expiresInParams[1];
+      };
       if (accessToken && expiresIn) {
         window.setTimeout(() => accessToken = '', expiresIn * 1000);
         window.history.pushState('Access Token', null, '/');
@@ -30,30 +34,42 @@ const Spotify = {
   },
 
   renderTracks: function (jsonResponse) {
-
+    console.log(jsonResponse.tracks.items);
+    if (jsonResponse.tracks.items) {
+      const tracksToReturn = jsonResponse.tracks.items.map((trck) => {
+        return {
+        id: trck.id,
+        name: trck.name,
+        artist: trck.artists[0].name,
+        album: trck.album.name,
+        uri: trck.uri 
+      }});
+      return tracksToReturn;
+    } else {
+      return [];
+    }
   },
 
   search: async function (term) {
-    {
+    
+      const apiToken = this.getAccessToken();
       const apiEndpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
       try {
         const response = await fetch( apiEndpoint, 
           { method: 'GET',
-            cache: 'no-cache',
-            headers: { 
-                Authorization: `Bearer ${this.accessToken}`
-              },
+              headers: { 
+                'Authorization': 'Bearer '+apiToken,
+                'Content-Type': 'application/json'
+              }
             });
         if(response.ok){
           const jsonResponse = await response.json();
-          renderTracks(jsonResponse);
+          return this.renderTracks(jsonResponse);
         }
       } catch (error) {
-        console.log(error);
+        console.log("ERROR:"+error.status+"-"+error.message);
       }
     }
   }
-
-}
 
 module.exports = {Spotify};

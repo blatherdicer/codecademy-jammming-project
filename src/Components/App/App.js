@@ -1,6 +1,8 @@
 import React from 'react';
 import './App.css';
 
+import { Spotify } from '../../util/Spotify';
+
 import { Playlist } from '../Playlist/Playlist';
 import { SearchBar } from '../SearchBar/SearchBar';
 import { SearchResults } from '../SearchResults/SearchResults';
@@ -84,8 +86,11 @@ export default class App extends React.Component {
     console.log(trackURIs)
   }
 
-  search(term){
-    console.log('Search initiated for term:'+term)
+  async search(term){
+    const results = await Spotify.search(term);
+    this.setState({
+      searchResults: results
+    })
   }
 
   render() {
