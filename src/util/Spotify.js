@@ -1,3 +1,5 @@
+const { isCompositeComponent } = require("react-dom/test-utils");
+
 const CLIENT_ID = "eea54cb88b224000ae2f240e19a85659";
 const REDIRECT_URI = "http://localhost:3000/";
 let accessToken = "";
@@ -6,31 +8,29 @@ let expiresIn = "";
 const Spotify = {
 
   getAccessToken: function () {
-    if (accessToken) {
-      // if there, return it
-      return accessToken;
-
-    } else {
+    console.log('Entering GetAccessToken()');
+    if (!accessToken) {
+      console.log('!accessToken');
       // check for token in URL
-      // Spotify is returning an array of two items: full parameter and just the value, hence [1]
       const url = window.location.href;
       const accessTokenParams = url.match(/access_token=([^&]*)/);
       const expiresInParams = url.match(/expires_in=([^&]*)/);
-      if (accessTokenParams) {
+      // Spotify is returning an array of two items: full parameter and just the value, hence [1]
+      if (accessTokenParams && expiresInParams) {
+        console.log('Found token in url');
         accessToken = accessTokenParams[1];
         expiresIn = expiresInParams[1];
-      };
-      if (accessToken && expiresIn) {
         window.setTimeout(() => accessToken = '', expiresIn * 1000);
-        window.history.pushState('Access Token', null, '/');
-        return accessToken;
-
+        //window.history.replaceState('access_token', null, '/');
       } else {
         // redirect to authenticate
+        console.log('Redirecting to Spotify Auth')
         window.location = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&scope=playlist-modify-public&redirect_uri=${REDIRECT_URI}`;
 
       }
     }
+    console.log('Returning token');
+    return accessToken;
   },
 
   renderTracks: function (jsonResponse) {
@@ -136,7 +136,7 @@ const Spotify = {
         });
       if (response.ok) {
         console.log('Success - created playlist.');
-        return(true);
+        return (true);
       }
     } catch (error) {
       console.log("ERROR:" + error.status + "-" + error.message);
