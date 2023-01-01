@@ -45,98 +45,50 @@ const Spotify = {
     }
   },
 
-  search: async function (term) {
+  spotifyFetch: async function (method, endpoint, body) {
     const apiToken = this.getAccessToken();
+    const apiEndpoint = `https://api.spotify.com/v1/${endpoint}`;
     const apiHeaders = {
       'Authorization': 'Bearer ' + apiToken,
       'Content-Type': 'application/json'
     };
-    const apiEndpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
     try {
       const response = await fetch(apiEndpoint,
         {
-          method: 'GET',
-          headers: apiHeaders
+          method: method,
+          headers: apiHeaders,
+          body: body && JSON.stringify(body)
         });
       if (response.ok) {
         const jsonResponse = await response.json();
-        return this.renderTracks(jsonResponse);
+        return jsonResponse;
       }
     } catch (error) {
       console.log("ERROR:" + error.status + "-" + error.message);
-    }
+    };
+  },
+
+  search: async function (term) {
+    const apiEndpoint = `search?type=track&q=${term}`;
+    const jsonResponse = await this.spotifyFetch('GET', apiEndpoint, null);
+    return this.renderTracks(jsonResponse)
   },
 
   savePlaylist: async function (playlistName, playlistTracks) {
-    if (!playlistName || !playlistTracks) {
-      return
-    }
-    let apiToken = this.getAccessToken();
-    const apiHeaders = {
-      'Authorization': 'Bearer ' + apiToken,
-      'Content-Type': 'application/json'
+    if (!playlistName || !playlistTracks) { return false }
+    const userResponse = await this.spotifyFetch('GET', `me`, null);
+    const userID = userResponse.id;
+    const playlistBody = {
+      name: playlistName,
+      description: 'Playlist from Jammming for Codecademy learning project',
+      public: true
     };
-    let userID = '';
-
-    // get user ID from Spotify API
-    let apiEndpoint = `https://api.spotify.com/v1/me`;
-    try {
-      const response = await fetch(apiEndpoint,
-        {
-          method: 'GET',
-          headers: apiHeaders
-        });
-      if (response.ok) {
-        const userJsonResponse = await response.json();
-        userID = userJsonResponse.id;
-      }
-    } catch (error) {
-      console.log("ERROR:" + error.status + "-" + error.message);
-    };
-
-    //create new Playlist
-    let playlistID = '';
-    apiToken = this.getAccessToken();
-    apiEndpoint = `https://api.spotify.com/v1/users/${userID}/playlists`;
-    try {
-      const response = await fetch(apiEndpoint,
-        {
-          method: 'POST',
-          headers: apiHeaders,
-          body: JSON.stringify({
-            name: playlistName,
-            description: 'Playlist from Jammming for Codecademy learning project',
-            public: true
-          })
-        });
-      if (response.ok) {
-        const playlistJsonResponse = await response.json();
-        playlistID = playlistJsonResponse.id;
-      }
-    } catch (error) {
-      console.log("ERROR:" + error.status + "-" + error.message);
-    };
-
-    //add the tracks to the Playlist
-    apiToken = this.getAccessToken();
-    apiEndpoint = `https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
-    try {
-      const response = await fetch(apiEndpoint,
-        {
-          method: 'POST',
-          headers: apiHeaders,
-          body: JSON.stringify({
-            uris: playlistTracks
-          })
-        });
-      if (response.ok) {
-        console.log('Success - created playlist.');
-        return (true);
-      }
-    } catch (error) {
-      console.log("ERROR:" + error.status + "-" + error.message);
-    };
-
+    const playlistResponse = await this.spotifyFetch('POST', `users/${userID}/playlists`, playlistBody);
+    const playlistID = playlistResponse.id;
+    const addTracksBody = { uris: playlistTracks };
+    await this.spotifyFetch('POST', `playlists/${playlistID}/tracks`, addTracksBody);
+    console.log('Spotify Playlist created OK');
+    return true;
   }
 }
 
