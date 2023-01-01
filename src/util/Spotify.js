@@ -1,4 +1,4 @@
-const { isCompositeComponent } = require("react-dom/test-utils");
+//const { isCompositeComponent } = require("react-dom/test-utils");
 
 const CLIENT_ID = "eea54cb88b224000ae2f240e19a85659";
 const REDIRECT_URI = "http://localhost:3000/";
