@@ -23,6 +23,10 @@ export default class App extends React.Component {
     this.search = this.search.bind(this);
   }
 
+  componentDidMount() {
+    window.addEventListener('load', () => {Spotify.getAccessToken()});
+  }
+
   addTrack(trackToAdd) {
     if (!this.state.playlistTracks.find(existTrack => existTrack.id === trackToAdd.id)) {
       this.setState({
@@ -44,10 +48,10 @@ export default class App extends React.Component {
     this.setState({ playlistName: name })
   }
 
-  savePlaylist() {
+  async savePlaylist() {
     const trackURIs = this.state.playlistTracks.map((trk) => trk.uri);
     const playlistName = this.state.playlistName;
-    const playlistSaved = Spotify.savePlaylist(playlistName, trackURIs);
+    const playlistSaved = await Spotify.savePlaylist(playlistName, trackURIs);
     if (playlistSaved) {
       this.setState({
         playlistTracks: [],
