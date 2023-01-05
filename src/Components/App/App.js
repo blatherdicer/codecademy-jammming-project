@@ -13,6 +13,7 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       searchResults: [],
+      moreResultsUrl: null,
       playlistName: 'My Playlist',
       playlistTracks: []
     }
@@ -21,6 +22,7 @@ export default class App extends React.Component {
     this.updatePlaylistName = this.updatePlaylistName.bind(this);
     this.savePlaylist = this.savePlaylist.bind(this);
     this.search = this.search.bind(this);
+    this.searchNext = this.searchNext.bind(this);
   }
 
   componentDidMount() {
@@ -66,7 +68,16 @@ export default class App extends React.Component {
   async search(term) {
     const results = await Spotify.search(term);
     this.setState({
-      searchResults: results
+      searchResults: results.searchResults,
+      moreResultsUrl: results.moreResultsUrl
+    })
+  }
+
+  async searchNext() {
+    const results = await Spotify.searchNext(this.state.moreResultsUrl);
+    this.setState({
+      searchResults: [...this.state.searchResults, ...results.searchResults],
+      moreResultsUrl: results.moreResultsUrl
     })
   }
 
@@ -77,7 +88,12 @@ export default class App extends React.Component {
         <div className="App">
           <SearchBar onSearch={this.search} />
           <div className="App-playlist">
-            <SearchResults onAdd={this.addTrack} searchResults={this.state.searchResults} />
+            <SearchResults 
+              onAdd={this.addTrack} 
+              onNext={this.searchNext}
+              searchResults={this.state.searchResults} 
+              moreResults={this.state.moreResultsUrl}
+              />
             <Playlist
               onRemove={this.removeTrack}
               onSave={this.savePlaylist}

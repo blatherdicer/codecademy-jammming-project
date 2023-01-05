@@ -39,7 +39,8 @@ const Spotify = {
           uri: trck.uri
         }
       });
-      return tracksToReturn;
+      return { searchResults: tracksToReturn,
+               moreResultsUrl: jsonResponse.tracks.next};
     } else {
       return [];
     }
@@ -69,9 +70,19 @@ const Spotify = {
   },
 
   search: async function (term) {
-    const apiEndpoint = `search?type=track&q=${term}`;
+    const apiEndpoint = `search?type=track&limit=10&q=${term}`;
     const jsonResponse = await this.spotifyFetch('GET', apiEndpoint, null);
     return this.renderTracks(jsonResponse)
+  },
+
+  searchNext: async function (nextApiUrl) {
+    if (!nextApiUrl) { 
+      return { searchResults: [], moreResultsUrl:null} 
+    } else {
+      const apiEndpoint = nextApiUrl.substring(nextApiUrl.search('search?'));
+      const jsonResponse = await this.spotifyFetch('GET', apiEndpoint, null);
+      return this.renderTracks(jsonResponse)
+    }
   },
 
   savePlaylist: async function (playlistName, playlistTracks) {
