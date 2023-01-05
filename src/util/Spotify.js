@@ -5,7 +5,7 @@ const REDIRECT_URI = "http://localhost:3000/";
 let accessToken = "";
 let expiresIn = "";
 
-const Spotify = {
+export const Spotify = {
 
   getAccessToken: function () {
     if (!accessToken) {
@@ -108,5 +108,3 @@ const Spotify = {
     return true;
   }
 }
-
-module.exports = { Spotify };
