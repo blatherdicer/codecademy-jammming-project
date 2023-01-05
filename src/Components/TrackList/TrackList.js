@@ -12,11 +12,12 @@ export class TrackList extends React.Component {
             <Track key={trck.id.toString()}
                    track={trck} 
                    name={trck.name} 
-                   artist = {trck.artist}
-                   album = {trck.album}
-                   onAdd = {this.props.onAdd}
-                   onRemove = {this.props.onRemove}
-                   isRemoval = {this.props.isRemoval}
+                   artist={trck.artist}
+                   album={trck.album}
+                   albumArtUrl={trck.albumArtUrl}
+                   onAdd={this.props.onAdd}
+                   onRemove={this.props.onRemove}
+                   isRemoval={this.props.isRemoval}
                    />)}
       </div>
     )

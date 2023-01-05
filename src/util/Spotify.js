@@ -36,13 +36,19 @@ const Spotify = {
           name: trck.name,
           artist: trck.artists[0].name,
           album: trck.album.name,
-          uri: trck.uri
+          uri: trck.uri,
+          albumArtUrl: trck.album.images[0].url
         }
       });
-      return { searchResults: tracksToReturn,
-               moreResultsUrl: jsonResponse.tracks.next};
+      return {
+        searchResults: tracksToReturn,
+        moreResultsUrl: jsonResponse.tracks.next
+      };
     } else {
-      return [];
+      return {
+        searchResults: [],
+        moreResultsUrl: null
+      };
     }
   },
 

@@ -7,6 +7,10 @@
   box-shadow: 0 4px 2px 2px #000000;
 }
 
+.SearchResults h2 {
+  border-bottom: 1px solid #6f6f6f;
+}
+
 .More-results {
   cursor: pointer;
   width: 10rem;
